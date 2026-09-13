@@ -424,7 +424,7 @@ class Main {
             System.out.println("Hmmm\n\nLet me think\n");
             System.out.println("Should I let you pick again since you made a mistake?\n");
             wait(1000);
-            if (randomValue(1) == 1) {
+            if (randomValue(2) == 1) {
                 System.out.println("Fine you can pick again\n");
                 move(piece, opponentPiece);
             }
@@ -460,14 +460,14 @@ class Main {
         bad = input.nextLine();
         System.out.println("\nActivating lock in mode" + wait(500) + "\n" + "\nHmm, Let me think if I want you to pick your own piece.\n");
         wait(1000);
-        if (randomValue(1) == 1) {
-            if (randomValue(1) == 1) {
+        if (randomValue(2) == 1) {
+            if (randomValue(2) == 1) {
                 piece = 'X';
             }
             else {
                 piece = 'O';
             }
-            System.out.println("Nah\n\n" + wait(2000) + "You will be " + piece + "\n\n");
+            System.out.println("Nah" + wait(2000) + "\n\nYou will be " + piece);
 
         }
         else {
@@ -477,13 +477,13 @@ class Main {
                 System.out.println("\nCan lil bro even read? I said to pick 'O' or 'X'\n\n" + "Hurry up before I change my mind\n");
                 piece = input.next().charAt(0);
                 if (piece != 'O' && piece != 'o' && piece != 'X' && piece != 'x') {
-                    if (randomValue(1) == 1) {
+                    if (randomValue(2) == 1) {
                         piece = 'X';
                     }
                     else {
                         piece = 'O';
                     }
-                    System.out.println("Ok, I'm choosing for you now" + wait(2000) + "\n" + "You will be " + piece + "\n\n");                    
+                    System.out.println("Ok, I'm choosing for you now" + wait(2000) + "\n\n" + "You will be " + piece);                    
                 }
             }
         }
