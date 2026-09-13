@@ -30,28 +30,50 @@ class Main {
     static int twodiagonalOpenr;
     static int twodiagonalOpenc;
     static int twodiagonalOpen;
+    static char piece;
+    static char opponentPiece;
+    static String name;
+    static String bad;
+    static boolean tie;
+    static int fullrow;
 
     public static void drawBoard() {
-        System.out.println("-------------");
-        System.out.println("| " + board[0][0] + " | " + board[0][1] + " | " + board[0][2] + " |");
-        System.out.println("-------------");
-        System.out.println("| " + board[1][0] + " | " + board[1][1] + " | " + board[1][2] + " |");
-        System.out.println("-------------");
-        System.out.println("| " + board[2][0] + " | " + board[2][1] + " | " + board[2][2] + " |");
-        System.out.println("-------------");
+        System.out.println("    1   2   3");
+        System.out.println("  -------------");
+        System.out.println("1 | " + board[0][0] + " | " + board[0][1] + " | " + board[0][2] + " |");
+        System.out.println("  -------------");
+        System.out.println("2 | " + board[1][0] + " | " + board[1][1] + " | " + board[1][2] + " |");
+        System.out.println("  -------------");
+        System.out.println("3 | " + board[2][0] + " | " + board[2][1] + " | " + board[2][2] + " |");
+        System.out.println("  -------------");
     }
     public static void main(String[] args) {
         System.out.println("Welcome to Tic Tac Toe!\n");
-        char piece = introduction();
-        char opponentPiece = opponentPiece(piece);
-        while (!hasWon) {
+        piece = introduction();
+        opponentPiece = opponentPiece(piece);
+        while (checkWinner(piece, opponentPiece).equals("none")) {
+            int countone = count + 1;
+            System.out.println("\nRound: " + countone);
             drawBoard();
             move(piece, opponentPiece);
             computerMove(opponentPiece, piece);
-            if (!(count < 3)) {
-                checkWinner();
-            }
             count++;
+        }
+
+        drawBoard();
+
+        switch (checkWinner(piece, opponentPiece)) {
+            case "player" -> {
+                System.out.println("What...\n");
+                wait(500);
+                System.out.println("That's IMPOSSIBLE\n");
+                System.out.println("Congratulation " + name + "! Even though your weakness is " + bad + ", you somehow have done the unthinkable and beat the robot.\n+1000 Aura");
+            }
+            case "computer" -> {
+                System.out.println("\n" + name + "..." + wait(500) + "\nDid you really think you had a chance?\n");
+                System.out.println("It's okay, not all can beat the robot");
+            }
+            default -> System.out.println("Wow, you were able to tie with me.\n");
         }
 
     }
@@ -59,6 +81,8 @@ class Main {
     public static void computerMove(char opponentPiece, char piece) {
         if (board[1][1] == ' ' && count == 0) {
             board[1][1] = opponentPiece;
+            System.out.println("lil bro forgot to take the middle spot");
+            return;
         }
         
         // look for open end spot and take it
@@ -192,36 +216,106 @@ class Main {
             twodiagonalCountLook = 0;
             twodiagonalOpen = 0;
         }
-        random = (int) (Math.random() * 3);
+        int bestScore = Integer.MIN_VALUE;
+        int bestRow = -1;
+        int bestColumn = -1;
 
-        if (emptyPosition.equals("row")) {
-            board[emptyPositionNumber][random] = opponentPiece;
-        }
-        else if (emptyPosition.equals("column")) {
-            board[random][emptyPositionNumber] = opponentPiece;
-        }
-        else {
-            if (emptyPositionNumber == 1) {
-                board[random][random] = opponentPiece;
-            }
-            else {
-                switch (random) {
-                    case 0:
-                        board[0][2] = opponentPiece;
-                        break;
-                    case 1:
-                        board[1][1] = opponentPiece;
-                        break;
-                    default:
-                        board[2][0] = opponentPiece;
-                        break;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == ' ') {
+
+                    // Pretend computer chooses this position
+                    board[i][j] = opponentPiece;
+
+                    // See how good this move would be
+                    int score = minimax(piece, opponentPiece, false);
+
+                    // Undo pretend move
+                    board[i][j] = ' ';
+
+                    // Remember the best move
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestRow = i;
+                        bestColumn = j;
+                    }
                 }
             }
         }
-        
+
+        if (bestRow != -1) {
+        board[bestRow][bestColumn] = opponentPiece;
+        }
     }
 
-    public static int checkWinner() {
+    public static int minimax(char playerPiece, char computerPiece, boolean computerTurn) {
+
+        if (didWin(computerPiece)) {
+            return 10;
+        }
+
+        if (didWin(playerPiece)) {
+            return -10;
+        }
+
+        if (boardFull()) {
+            return 0;
+        }
+
+        if (computerTurn) {
+
+            int bestScore = Integer.MIN_VALUE;
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+
+                    if (board[i][j] == ' ') {
+
+                        board[i][j] = computerPiece;
+
+                        int score =
+                            minimax(playerPiece, computerPiece, false);
+
+                            board[i][j] = ' ';
+
+                        if (score > bestScore) {
+                            bestScore = score;
+                        }
+                    }
+                }
+            }
+
+            return bestScore;
+        }
+
+        else {
+
+            int bestScore = Integer.MAX_VALUE;
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+
+                    if (board[i][j] == ' ') {
+
+                        board[i][j] = playerPiece;
+
+                        int score =
+                            minimax(playerPiece, computerPiece, true);
+
+                            board[i][j] = ' ';
+
+                        if (score < bestScore) {
+                            bestScore = score;
+                        }
+                    }
+                }
+            }
+
+            return bestScore;
+        }
+    }
+
+    public static String checkWinner(char piece, char opponentPiece) {
         for (int i = 0; i < 3; i++) {
             if (!hasWon && board[i][0] != ' ' && board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
                 hasWon = true;
@@ -235,16 +329,23 @@ class Main {
                 hasWon = true;
                 Winner = board[0][0];                   
             }
-            else if (!hasWon && board[2][2] != ' ' && board[0][2] == board[1][1] && board[0][0] == board[2][0]) {
+            else if (!hasWon && board[0][2] != ' ' && board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
                 hasWon = true;
-                Winner = board[0][0];                   
+                Winner = board[0][2];                   
             }
         }
-        return switch (Winner) {
-            case 'X' -> 1;
-            case 'O' -> 2;
-            default -> 0;
-        };
+        if (Winner == piece) {
+            return "player";
+        }
+        else if (Winner == opponentPiece) {
+            return "computer";
+        }
+        else if (boardFull()) {
+            return "tie";
+        }
+        else {
+            return "none";
+        }
     }
 
     public static char opponentPiece(char piece) {
@@ -256,40 +357,141 @@ class Main {
         }        
     }
 
+    public static boolean didWin(char piece) {
+
+        // Rows
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == piece &&
+                board[i][1] == piece &&
+                board[i][2] == piece) {
+
+                return true;
+            }
+        }
+
+        // Columns
+        for (int i = 0; i < 3; i++) {
+            if (board[0][i] == piece &&
+                board[1][i] == piece &&
+                board[2][i] == piece) {
+
+                return true;
+            }
+        }
+
+        // Diagonal
+        if (board[0][0] == piece &&
+            board[1][1] == piece &&
+            board[2][2] == piece) {
+
+            return true;
+        }
+
+        // Other diagonal
+        if (board[0][2] == piece &&
+            board[1][1] == piece &&
+            board[2][0] == piece) {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean boardFull() {
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+
+                if (board[i][j] == ' ') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public static void move(char piece, char opponentPiece) {
-        System.out.println("Your turn!\n\n Select a row:\n");
-        int row = input.nextInt();
+        System.out.println("Your turn!\n\nSelect a row:\n");
+        int row = input.nextInt() - 1;
 
         System.out.println("Select a column:\n");
-        int column = input.nextInt();
+        int column = input.nextInt() - 1;
         if (board[row][column] == piece) {
-            System.out.println("Silly you! You already chose this spot");
+            System.out.println("Silly you! You already chose this spot\n");
+            wait(500);
+            System.out.println("Hmmm\n\nLet me think\n");
+            System.out.println("Should I let you pick again since you made a mistake?\n");
+            wait(1000);
+            if (randomValue(1) == 1) {
+                System.out.println("Fine you can pick again\n");
+                move(piece, opponentPiece);
+            }
+            else {
+                System.out.println(name + " did you actually think I was a nice robot? " + "Nah no way, lil bro thought I would actually let him pick again lmao.\n");
+            }
         }
         else if (board[row][column] == opponentPiece) {
             System.out.println("I already took this spot lil bro");
+            move(piece, opponentPiece);
         }
         else {
             board[row][column] = piece;
         }
-
-
     }
     
-    public static char introduction() {
-        System.out.println("Hello! Welcome to my tic tac toe game!\n\n What is your name?");
-        String name = input.nextLine();
-        System.out.println("What is something that you are bad at?");
-        String bad = input.nextLine();
-        System.out.println("What do you want to be O or X?");
-        char piece = input.next().charAt(0);
-        System.out.println("Okay...");
+    public static int randomValue(int cap) {
+        return (int) (Math.random() * cap);
+    }
+
+    public static String wait(int milliseconds) {
         try {
-            Thread.sleep(2000);
+            Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        return " ";
+    }
+    public static char introduction() {
+        System.out.println("What is your name?\n");
+        name = input.nextLine();
+        System.out.println("\nHello " + name + "! What is your greatest weakness if you don't mind me asking of course :)\n");
+        bad = input.nextLine();
+        System.out.println("\nActivating lock in mode" + wait(500) + "\n" + "\nHmm, Let me think if I want you to pick your own piece.\n");
+        wait(1000);
+        if (randomValue(1) == 1) {
+            if (randomValue(1) == 1) {
+                piece = 'X';
+            }
+            else {
+                piece = 'O';
+            }
+            System.out.println("Nah\n\n" + wait(2000) + "You will be " + piece + "\n\n");
 
-        System.out.println("I have all the information I need...\n\nLet's do this.");
+        }
+        else {
+            System.out.println("Fine, I'm feeling generous today.\n\n" + "What do you want to be O or X?\n");
+            piece = input.next().charAt(0);
+            if (piece != 'O' && piece != 'o' && piece != 'X' && piece != 'x') {
+                System.out.println("\nCan lil bro even read? I said to pick 'O' or 'X'\n\n" + "Hurry up before I change my mind\n");
+                piece = input.next().charAt(0);
+                if (piece != 'O' && piece != 'o' && piece != 'X' && piece != 'x') {
+                    if (randomValue(1) == 1) {
+                        piece = 'X';
+                    }
+                    else {
+                        piece = 'O';
+                    }
+                    System.out.println("Ok, I'm choosing for you now" + wait(2000) + "\n" + "You will be " + piece + "\n\n");                    
+                }
+            }
+        }
+        System.out.println("\nOkay...\n");
+        wait(1000);
+        System.out.println("Calculating your moves ahead of time\n");
+
+        System.out.println("I have all the information I need...\n\nLet's" + wait(500) + "do this.");
         return (piece);
     }
 }
